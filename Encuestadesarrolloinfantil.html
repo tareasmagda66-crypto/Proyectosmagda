@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Encuesta — Desarrollo Infantil · ICEST</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green:   #00C896;
+    --green2:  #00A87A;
+    --yellow:  #FFD23F;
+    --yellow2: #E6B800;
+    --coral:   #FF6B6B;
+    --coral2:  #E04E4E;
+    --purple:  #A855F7;
+    --purple2: #8B3FD8;
+    --blue:    #38BDF8;
+    --blue2:   #0EA5D9;
+    --orange:  #FF8C42;
+    --pink:    #FF5FA0;
+    --white:   #FFFFFF;
+    --dark:    #1A1A2E;
+    --card-bg: #FFFFFF;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #0F3460 0%, #16213E 40%, #1A1A2E 100%);
+    min-height: 100vh;
+    overflow-x: hidden;
+    color: var(--dark);
+  }
+
+  /* ---- BUBBLES BG ---- */
+  .bg-bubbles { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .bubble {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.12;
+    animation: float linear infinite;
+  }
+  .bubble:nth-child(1)  { width:120px;height:120px;background:var(--green);  left:5%;  animation-duration:18s; animation-delay:0s;   bottom:-120px; }
+  .bubble:nth-child(2)  { width:80px; height:80px; background:var(--yellow); left:15%; animation-duration:14s; animation-delay:-3s;  bottom:-80px;  }
+  .bubble:nth-child(3)  { width:60px; height:60px; background:var(--coral);  left:30%; animation-duration:20s; animation-delay:-7s;  bottom:-60px;  }
+  .bubble:nth-child(4)  { width:100px;height:100px;background:var(--blue);   left:50%; animation-duration:16s; animation-delay:-2s;  bottom:-100px; }
+  .bubble:nth-child(5)  { width:70px; height:70px; background:var(--purple); left:65%; animation-duration:22s; animation-delay:-5s;  bottom:-70px;  }
+  .bubble:nth-child(6)  { width:90px; height:90px; background:var(--pink);   left:80%; animation-duration:17s; animation-delay:-9s;  bottom:-90px;  }
+  .bubble:nth-child(7)  { width:50px; height:50px; background:var(--orange); left:92%; animation-duration:13s; animation-delay:-1s;  bottom:-50px;  }
+  @keyframes float { to { transform: translateY(-110vh) rotate(720deg); } }
+
+  /* ---- WRAPPER ---- */
+  .wrapper {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 2rem 1rem 3rem;
+  }
+
+  /* ---- HEADER ---- */
+  .header {
+    text-align: center;
+    margin-bottom: 2rem;
+    animation: slideDown 0.7s cubic-bezier(.22,1,.36,1) both;
+  }
+  @keyframes slideDown { from { opacity:0; transform:translateY(-30px); } to { opacity:1; transform:translateY(0); } }
+
+  .header-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 999px;
+    padding: 6px 18px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin-bottom: 1rem;
+    backdrop-filter: blur(8px);
+  }
+  .badge-dot { width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.6;transform:scale(1.4);} }
+
+  .header h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2rem, 5vw, 3rem);
+    color: #fff;
+    line-height: 1.1;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    margin-bottom: 0.5rem;
+  }
+  .header h1 span { color: var(--yellow); }
+  .header p { color: rgba(255,255,255,0.65); font-size: 15px; font-weight: 600; }
+
+  /* ---- CARD ---- */
+  .card {
+    background: var(--card-bg);
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.2);
+    width: 100%;
+    max-width: 640px;
+    overflow: hidden;
+    animation: popIn 0.6s cubic-bezier(.22,1,.36,1) 0.2s both;
+  }
+  @keyframes popIn { from { opacity:0; transform:scale(0.92) translateY(20px); } to { opacity:1; transform:scale(1) translateY(0); } }
+
+  /* ---- PROGRESS ---- */
+  .progress-track {
+    height: 6px;
+    background: #F0F0F5;
+  }
+  .progress-fill {
+    height: 6px;
+    background: linear-gradient(90deg, var(--green), var(--blue));
+    border-radius: 0 3px 3px 0;
+    transition: width 0.5s cubic-bezier(.22,1,.36,1);
+  }
+
+  /* ---- PAGE ---- */
+  .page { display: none; padding: 2rem; }
+  .page.active { display: block; }
+
+  /* ---- STEP HEADER ---- */
+  .step-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: linear-gradient(135deg, var(--purple), var(--blue));
+    color: #fff;
+    border-radius: 999px;
+    padding: 4px 14px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
+  }
+  .page-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.5rem;
+    color: var(--dark);
+    margin-bottom: 6px;
+  }
+  .page-desc { font-size: 14px; color: #666; font-weight: 600; margin-bottom: 1.5rem; }
+
+  /* ---- FIELDS ---- */
+  .field { margin-bottom: 1.25rem; }
+  .field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 800;
+    color: #444;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .field label .req { color: var(--coral); }
+  .field input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2.5px solid #E8E8F0;
+    border-radius: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--dark);
+    background: #FAFAFE;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .field input:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 0 4px rgba(0,200,150,0.15);
+    background: #fff;
+  }
+  .field-icon { position: relative; }
+  .field-icon svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+  .field-icon input { padding-left: 44px; }
+  .err { font-size: 12px; color: var(--coral); font-weight: 700; margin-top: 5px; display: none; }
+
+  /* ---- QUESTION BLOCKS ---- */
+  .q-block {
+    border: 2.5px solid #F0F0F8;
+    border-radius: 18px;
+    padding: 1.1rem 1.25rem;
+    margin-bottom: 1rem;
+    transition: border-color 0.2s, transform 0.15s;
+    background: #FAFAFE;
+  }
+  .q-block:hover { transform: translateY(-2px); }
+  .q-block.answered-si { border-color: var(--green); background: #F0FDF8; }
+  .q-block.answered-no { border-color: var(--coral); background: #FFF5F5; }
+
+  .q-num {
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #aaa;
+    margin-bottom: 6px;
+  }
+  .q-text {
+    font-size: 14px;
+    font-weight: 700;
+    color: #333;
+    line-height: 1.55;
+    margin-bottom: 14px;
+  }
+  .btn-row { display: flex; gap: 10px; }
+
+  .ans-btn {
+    flex: 1;
+    padding: 10px 0;
+    border-radius: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    border: 2.5px solid #E0E0EE;
+    background: #fff;
+    color: #888;
+    transition: all 0.18s cubic-bezier(.22,1,.36,1);
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .ans-btn:hover { transform: scale(1.04); }
+  .ans-btn.sel-si {
+    background: linear-gradient(135deg, var(--green), var(--green2));
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(0,200,150,0.4);
+  }
+  .ans-btn.sel-no {
+    background: linear-gradient(135deg, var(--coral), var(--coral2));
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(255,107,107,0.4);
+  }
+
+  /* ---- NAV BUTTONS ---- */
+  .nav-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.75rem;
+    gap: 12px;
+  }
+  .btn-nav {
+    padding: 12px 24px;
+    border-radius: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    border: none;
+    display: flex; align-items: center; gap: 8px;
+    transition: all 0.18s cubic-bezier(.22,1,.36,1);
+  }
+  .btn-nav:active { transform: scale(0.97); }
+  .btn-back {
+    background: #F0F0F8;
+    color: #666;
+  }
+  .btn-back:hover { background: #E4E4F4; }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--green), var(--blue));
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(0,200,150,0.4);
+  }
+  .btn-primary:hover { box-shadow: 0 8px 26px rgba(0,200,150,0.55); transform: translateY(-1px); }
+
+  .global-err { font-size: 13px; color: var(--coral); font-weight: 700; text-align: center; margin-top: 10px; display: none; }
+
+  /* ---- SUCCESS PAGE ---- */
+  .success-center { text-align: center; padding: 1rem 0 0.5rem; }
+  .confetti-ring {
+    width: 90px; height: 90px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--yellow), var(--orange), var(--pink));
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.25rem;
+    animation: spin 3s linear infinite;
+    box-shadow: 0 8px 30px rgba(255,141,66,0.5);
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .confetti-ring-inner {
+    width: 74px; height: 74px;
+    border-radius: 50%;
+    background: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem;
+  }
+  .success-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.8rem;
+    color: var(--dark);
+    margin-bottom: 6px;
+  }
+  .success-sub { font-size: 14px; color: #666; font-weight: 600; margin-bottom: 1.5rem; }
+
+  /* ---- SUMMARY ---- */
+  .summary-card {
+    background: #F8F8FF;
+    border-radius: 16px;
+    border: 2px solid #EEEEF8;
+    overflow: hidden;
+    margin-top: 1rem;
+  }
+  .summary-header {
+    padding: 12px 16px;
+    background: linear-gradient(135deg, var(--purple), var(--blue));
+    color: #fff;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 10px 16px;
+    border-bottom: 1px solid #EEEEF8;
+    gap: 12px;
+  }
+  .summary-row:last-child { border-bottom: none; }
+  .summary-q { font-size: 13px; color: #444; font-weight: 600; flex: 1; line-height: 1.4; }
+  .summary-a {
+    font-size: 12px;
+    font-weight: 800;
+    padding: 3px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .a-si { background: linear-gradient(135deg, var(--green), #00A87A); color: #fff; }
+  .a-no { background: linear-gradient(135deg, var(--coral), #E04E4E); color: #fff; }
+
+  /* ---- ADMIN TOGGLE ---- */
+  .admin-link {
+    margin-top: 1.5rem;
+    color: rgba(255,255,255,0.35);
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    transition: color 0.2s;
+    background: none;
+    border: none;
+  }
+  .admin-link:hover { color: rgba(255,255,255,0.65); }
+
+  /* ---- ADMIN PANEL ---- */
+  #admin-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(10,10,30,0.85);
+    backdrop-filter: blur(6px);
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  #admin-overlay.open { display: flex; }
+
+  .admin-modal {
+    background: #fff;
+    border-radius: 24px;
+    width: 100%;
+    max-width: 720px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+    animation: popIn 0.4s cubic-bezier(.22,1,.36,1);
+  }
+
+  .admin-top {
+    background: linear-gradient(135deg, #1A1A2E, #0F3460);
+    padding: 1.5rem 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .admin-top-left h2 {
+    font-family: 'Fredoka One', cursive;
+    color: #fff;
+    font-size: 1.4rem;
+    margin-bottom: 2px;
+  }
+  .admin-top-left p { color: rgba(255,255,255,0.55); font-size: 13px; font-weight: 600; }
+  .admin-close {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .admin-close:hover { background: rgba(255,255,255,0.2); }
+
+  .admin-body { padding: 1.5rem 1.75rem; overflow-y: auto; flex: 1; }
+
+  /* login form */
+  #admin-login { text-align: center; }
+  .lock-icon {
+    width: 70px; height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--purple), var(--blue));
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 2rem;
+    box-shadow: 0 6px 20px rgba(168,85,247,0.45);
+  }
+  #admin-login h3 { font-family:'Fredoka One',cursive; font-size:1.3rem; margin-bottom:6px; }
+  #admin-login p { font-size:13px;color:#666;font-weight:600;margin-bottom:1.25rem; }
+  #admin-pw {
+    width: 100%; max-width: 320px;
+    padding: 12px 16px;
+    border: 2.5px solid #E0E0EE;
+    border-radius: 14px;
+    font-family: 'Nunito',sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    text-align: center;
+    letter-spacing: 0.15em;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 10px;
+  }
+  #admin-pw:focus { border-color: var(--purple); box-shadow: 0 0 0 4px rgba(168,85,247,0.15); }
+  #pw-err { font-size:13px;color:var(--coral);font-weight:700;margin-bottom:10px;display:none; }
+  .btn-login {
+    width: 100%; max-width: 320px;
+    padding: 12px;
+    border-radius: 14px;
+    border: none;
+    background: linear-gradient(135deg, var(--purple), var(--blue));
+    color: #fff;
+    font-family: 'Nunito',sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(168,85,247,0.4);
+    transition: all 0.18s;
+  }
+  .btn-login:hover { box-shadow: 0 8px 26px rgba(168,85,247,0.55); transform: translateY(-1px); }
+
+  /* responses */
+  #admin-responses { display: none; }
+  .admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+  .stat-card {
+    background: #FAFAFE;
+    border: 2px solid #EEEEF8;
+    border-radius: 16px;
+    padding: 14px;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2rem;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-label { font-size: 12px; color: #888; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  .resp-card {
+    border: 2px solid #EEEEF8;
+    border-radius: 16px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+  }
+  .resp-header {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+  }
+  .resp-header:hover { background: #FAFAFE; }
+  .resp-person { display: flex; align-items: center; gap: 10px; }
+  .resp-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 900;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .resp-name { font-size: 14px; font-weight: 800; color: var(--dark); }
+  .resp-contact { font-size: 12px; color: #888; font-weight: 600; }
+  .resp-chevron { font-size: 18px; color: #aaa; transition: transform 0.2s; }
+  .resp-card.open .resp-chevron { transform: rotate(180deg); }
+  .resp-body { display: none; padding: 0 16px 14px; border-top: 1.5px solid #EEEEF8; }
+  .resp-card.open .resp-body { display: block; }
+  .resp-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 8px 0;
+    border-bottom: 1px solid #F4F4FB;
+    gap: 10px;
+  }
+  .resp-row:last-child { border-bottom: none; }
+  .resp-q { font-size: 12.5px; color: #555; font-weight: 600; flex: 1; line-height: 1.45; }
+  .pill-si { background: linear-gradient(135deg, var(--green), #00A87A); color:#fff; font-size:11px; font-weight:800; padding:3px 10px; border-radius:999px; white-space:nowrap; }
+  .pill-no { background: linear-gradient(135deg, var(--coral), #E04E4E); color:#fff; font-size:11px; font-weight:800; padding:3px 10px; border-radius:999px; white-space:nowrap; }
+
+  .no-data { text-align:center; padding: 2.5rem 1rem; color: #aaa; font-weight: 700; font-size: 15px; }
+
+  .btn-clear {
+    margin-top: 1rem;
+    padding: 10px 20px;
+    border-radius: 12px;
+    border: 2px solid #FFDDDD;
+    background: #FFF5F5;
+    color: var(--coral2);
+    font-family: 'Nunito',sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .btn-clear:hover { background: #FFE8E8; }
+
+  /* ---- RESPONSIVE ---- */
+  @media (max-width: 500px) {
+    .page { padding: 1.25rem; }
+    .admin-body { padding: 1.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-bubbles">
+  <div class="bubble"></div><div class="bubble"></div><div class="bubble"></div>
+  <div class="bubble"></div><div class="bubble"></div><div class="bubble"></div>
+  <div class="bubble"></div>
+</div>
+
+<div class="wrapper">
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-badge"><span class="badge-dot"></span> Universidad ICEST · Fisioterapia</div>
+    <h1>Evaluación del<br><span>Desarrollo Infantil</span> 🌱</h1>
+    <p>Magdalena Ferrusquía — Licenciatura en Fisioterapia</p>
+  </div>
+
+  <!-- CARD -->
+  <div class="card">
+    <div class="progress-track"><div class="progress-fill" id="prog" style="width:0%"></div></div>
+
+    <!-- PAGE 0: Datos -->
+    <div class="page active" id="p0">
+      <div class="step-pill">✨ Paso 1 de 2</div>
+      <h2 class="page-title">¡Hola! Cuéntanos quién eres 👋</h2>
+      <p class="page-desc">Completa tus datos de contacto antes de responder la encuesta.</p>
+
+      <div class="field">
+        <label>Nombre completo <span class="req">*</span></label>
+        <div class="field-icon">
+          <svg width="18" height="18" fill="none" stroke="#aaa" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          <input type="text" id="inp-nombre" placeholder="Tu nombre completo" />
+        </div>
+        <div class="err" id="err-n">Por favor ingresa tu nombre.</div>
+      </div>
+
+      <div class="field">
+        <label>Teléfono o correo electrónico <span class="req">*</span></label>
+        <div class="field-icon">
+          <svg width="18" height="18" fill="none" stroke="#aaa" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+          <input type="text" id="inp-contacto" placeholder="Tel. o correo" />
+        </div>
+        <div class="err" id="err-c">Por favor ingresa un medio de contacto.</div>
+      </div>
+
+      <div class="nav-row" style="justify-content:flex-end">
+        <button class="btn-nav btn-primary" onclick="goTo(1)">Continuar <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      </div>
+    </div>
+
+    <!-- PAGE 1: Preguntas -->
+    <div class="page" id="p1">
+      <div class="step-pill">📝 Paso 2 de 2</div>
+      <h2 class="page-title">Responde las preguntas</h2>
+      <p class="page-desc">Selecciona <strong>Sí</strong> o <strong>No</strong> en cada pregunta.</p>
+      <div id="q-container"></div>
+      <div class="global-err" id="gerr">⚠️ Por favor responde todas las preguntas antes de enviar.</div>
+      <div class="nav-row">
+        <button class="btn-nav btn-back" onclick="goTo(0)"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Anterior</button>
+        <button class="btn-nav btn-primary" onclick="enviar()">Enviar encuesta 🚀</button>
+      </div>
+    </div>
+
+    <!-- PAGE 2: Gracias -->
+    <div class="page" id="p2">
+      <div class="success-center">
+        <div class="confetti-ring"><div class="confetti-ring-inner">🎉</div></div>
+        <h2 class="success-title">¡Muchas gracias!</h2>
+        <p class="success-sub">Tu respuesta quedó registrada. ¡Nos encanta tu interés!</p>
+      </div>
+      <div class="summary-card" id="summary"></div>
+    </div>
+  </div>
+
+  <!-- Admin link -->
+  <button class="admin-link" onclick="abrirAdmin()">⚙ Panel de administración</button>
+</div>
+
+<!-- ADMIN OVERLAY -->
+<div id="admin-overlay">
+  <div class="admin-modal">
+    <div class="admin-top">
+      <div class="admin-top-left">
+        <h2>🔐 Panel de administración</h2>
+        <p>Encuesta — Desarrollo Infantil · Magdalena Ferrusquía</p>
+      </div>
+      <button class="admin-close" onclick="cerrarAdmin()">✕</button>
+    </div>
+    <div class="admin-body">
+
+      <!-- LOGIN -->
+      <div id="admin-login">
+        <div class="lock-icon">🔒</div>
+        <h3>Acceso restringido</h3>
+        <p>Ingresa la contraseña para ver las respuestas.</p>
+        <input type="password" id="admin-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')loginAdmin()" />
+        <div id="pw-err">Contraseña incorrecta. Intenta de nuevo.</div>
+        <button class="btn-login" onclick="loginAdmin()">Entrar 🔑</button>
+      </div>
+
+      <!-- RESPUESTAS -->
+      <div id="admin-responses">
+        <div class="admin-stats" id="a-stats"></div>
+        <div id="resp-list"></div>
+        <button class="btn-clear" onclick="clearData()">🗑 Borrar todas las respuestas</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const PREGUNTAS = [
+  "¿Consideras importante contar con conocimientos sobre el desarrollo infantil?",
+  "¿Consideras que la evaluación del desarrollo infantil es una tarea compleja o difícil de realizar?",
+  "¿Conoces a alguna familia con un niño o niña menor de 6 años a quien le pudiera beneficiar una evaluación de su desarrollo infantil?",
+  "¿Te gustaría aprender a aplicar una herramienta de evaluación del desarrollo infantil en niños y niñas menores de 6 años?",
+  "En caso de realizar una evaluación del desarrollo infantil, ¿te gustaría compartir con la familia los resultados obtenidos y, cuando sea necesario, brindar recomendaciones para favorecer el desarrollo del niño o la niña?",
+  "¿Te gustaría formar parte del equipo piloto de estudiantes de la Licenciatura en Fisioterapia de la Universidad ICEST que participará en la evaluación del desarrollo infantil en menores de 6 años?"
+];
+
+const ADMIN_PASSWORD = "icest2025";
+const STORAGE_KEY = "encuesta_icest_respuestas";
+const SHEETS_URL = "https://script.google.com/macros/s/AKfycbyaE0IvbYCMxZBtERDXSSFEwDujqaY0aS0iBDIqSycS9QyTldOLxg-56ZaJGm08qYQM/exec";
+const AVATAR_COLORS = ["#A855F7","#00C896","#FF6B6B","#38BDF8","#FF8C42","#FF5FA0","#FFD23F","#0F6E56"];
+
+let answers = new Array(PREGUNTAS.length).fill(null);
+
+function goTo(page) {
+  if (page === 1) {
+    const n = document.getElementById('inp-nombre').value.trim();
+    const c = document.getElementById('inp-contacto').value.trim();
+    document.getElementById('err-n').style.display = n ? 'none' : 'block';
+    document.getElementById('err-c').style.display = c ? 'none' : 'block';
+    if (!n || !c) return;
+    buildQuestions();
+  }
+  ['p0','p1','p2'].forEach((id, i) => {
+    document.getElementById(id).classList.toggle('active', i === page);
+  });
+  const pct = page === 0 ? 0 : page === 1 ? 50 : 100;
+  document.getElementById('prog').style.width = pct + '%';
+}
+
+function buildQuestions() {
+  const cont = document.getElementById('q-container');
+  cont.innerHTML = '';
+  PREGUNTAS.forEach((q, i) => {
+    const div = document.createElement('div');
+    div.className = 'q-block' + (answers[i] === 'Sí' ? ' answered-si' : answers[i] === 'No' ? ' answered-no' : '');
+    div.id = `qb-${i}`;
+    div.innerHTML = `
+      <p class="q-num">Pregunta ${i+1} de ${PREGUNTAS.length}</p>
+      <p class="q-text">${q}</p>
+      <div class="btn-row">
+        <button class="ans-btn${answers[i]==='Sí'?' sel-si':''}" id="bsi-${i}" onclick="select(${i},'Sí')">✔ Sí</button>
+        <button class="ans-btn${answers[i]==='No'?' sel-no':''}" id="bno-${i}" onclick="select(${i},'No')">✖ No</button>
+      </div>`;
+    cont.appendChild(div);
+  });
+}
+
+function select(i, val) {
+  answers[i] = val;
+  document.getElementById(`bsi-${i}`).className = 'ans-btn' + (val === 'Sí' ? ' sel-si' : '');
+  document.getElementById(`bno-${i}`).className = 'ans-btn' + (val === 'No' ? ' sel-no' : '');
+  const block = document.getElementById(`qb-${i}`);
+  block.className = 'q-block ' + (val === 'Sí' ? 'answered-si' : 'answered-no');
+}
+
+function enviar() {
+  if (answers.some(a => a === null)) {
+    document.getElementById('gerr').style.display = 'block';
+    return;
+  }
+  document.getElementById('gerr').style.display = 'none';
+
+  const nombre = document.getElementById('inp-nombre').value.trim();
+  const contacto = document.getElementById('inp-contacto').value.trim();
+  const entry = { nombre, contacto, answers: [...answers], fecha: new Date().toLocaleString('es-MX') };
+
+  // Guardar local como respaldo
+  const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  existing.push(entry);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
+
+  // Mostrar pantalla de éxito de inmediato
+  buildSummary(nombre, contacto);
+  goTo(2);
+
+  // Enviar a Google Sheets en segundo plano
+  fetch(SHEETS_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(entry)
+  }).catch(err => console.warn('No se pudo enviar a Sheets:', err));
+}
+
+function buildSummary(nombre, contacto) {
+  const box = document.getElementById('summary');
+  box.innerHTML = `<div class="summary-header">📋 Resumen de tus respuestas</div>
+    <div class="summary-row"><span class="summary-q">👤 Nombre</span><span style="font-size:13px;font-weight:700;">${nombre}</span></div>
+    <div class="summary-row"><span class="summary-q">📬 Contacto</span><span style="font-size:13px;font-weight:700;">${contacto}</span></div>
+    ${PREGUNTAS.map((q,i) => `
+    <div class="summary-row">
+      <span class="summary-q">${i+1}. ${q.length > 65 ? q.slice(0,65)+'…' : q}</span>
+      <span class="summary-a ${answers[i]==='Sí'?'a-si':'a-no'}">${answers[i]}</span>
+    </div>`).join('')}`;
+}
+
+/* ADMIN */
+function abrirAdmin() {
+  document.getElementById('admin-overlay').classList.add('open');
+  document.getElementById('admin-pw').value = '';
+  document.getElementById('pw-err').style.display = 'none';
+  document.getElementById('admin-login').style.display = 'block';
+  document.getElementById('admin-responses').style.display = 'none';
+}
+function cerrarAdmin() {
+  document.getElementById('admin-overlay').classList.remove('open');
+}
+document.getElementById('admin-overlay').addEventListener('click', function(e) {
+  if (e.target === this) cerrarAdmin();
+});
+
+function loginAdmin() {
+  const pw = document.getElementById('admin-pw').value;
+  if (pw === ADMIN_PASSWORD) {
+    document.getElementById('admin-login').style.display = 'none';
+    document.getElementById('admin-responses').style.display = 'block';
+    renderResponses();
+  } else {
+    document.getElementById('pw-err').style.display = 'block';
+    document.getElementById('admin-pw').value = '';
+  }
+}
+
+function renderResponses() {
+  const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  const statsEl = document.getElementById('a-stats');
+  const listEl = document.getElementById('resp-list');
+
+  const total = data.length;
+  let siCounts = new Array(PREGUNTAS.length).fill(0);
+  data.forEach(r => r.answers.forEach((a,i) => { if (a === 'Sí') siCounts[i]++; }));
+
+  const totalSi = total > 0 ? Math.round(siCounts.reduce((a,b)=>a+b,0) / (total * PREGUNTAS.length) * 100) : 0;
+
+  statsEl.innerHTML = `
+    <div class="stat-card">
+      <div class="stat-num" style="color:var(--purple)">${total}</div>
+      <div class="stat-label">Respuestas</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" style="color:var(--green)">${totalSi}%</div>
+      <div class="stat-label">Respuestas Sí</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" style="color:var(--blue)">${total > 0 ? siCounts[3] : 0}</div>
+      <div class="stat-label">Quieren aprender</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" style="color:var(--orange)">${total > 0 ? siCounts[5] : 0}</div>
+      <div class="stat-label">Quieren participar</div>
+    </div>`;
+
+  if (total === 0) {
+    listEl.innerHTML = '<div class="no-data">📭 Aún no hay respuestas registradas.</div>';
+    return;
+  }
+
+  listEl.innerHTML = data.map((r, idx) => {
+    const initials = r.nombre.split(' ').slice(0,2).map(w => w[0]).join('').toUpperCase();
+    const color = AVATAR_COLORS[idx % AVATAR_COLORS.length];
+    return `
+    <div class="resp-card" id="rc-${idx}">
+      <div class="resp-header" onclick="toggleCard(${idx})">
+        <div class="resp-person">
+          <div class="resp-avatar" style="background:${color}">${initials}</div>
+          <div>
+            <div class="resp-name">${r.nombre}</div>
+            <div class="resp-contact">${r.contacto} · ${r.fecha}</div>
+          </div>
+        </div>
+        <span class="resp-chevron">▾</span>
+      </div>
+      <div class="resp-body">
+        ${PREGUNTAS.map((q,i) => `
+        <div class="resp-row">
+          <span class="resp-q">${i+1}. ${q}</span>
+          <span class="${r.answers[i]==='Sí'?'pill-si':'pill-no'}">${r.answers[i]}</span>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleCard(idx) {
+  document.getElementById(`rc-${idx}`).classList.toggle('open');
+}
+
+function clearData() {
+  if (confirm('¿Seguro que deseas borrar todas las respuestas? Esta acción no se puede deshacer.')) {
+    localStorage.removeItem(STORAGE_KEY);
+    renderResponses();
+  }
+}
+</script>
+</body>
+</html>

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -235,6 +236,34 @@
     box-shadow: 0 4px 14px rgba(255,107,107,0.4);
   }
 
+  /* ---- MULTI-OPTION BUTTONS ---- */
+  .opt-btn {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 2.5px solid #E0E0EE;
+    background: #fff;
+    color: #666;
+    text-align: left;
+    transition: all 0.18s cubic-bezier(.22,1,.36,1);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .opt-btn:hover { transform: scale(1.02); border-color: #c0c0e0; }
+  .opt-btn.sel-opt {
+    background: linear-gradient(135deg, var(--purple), var(--blue));
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(168,85,247,0.4);
+  }
+  .q-block.answered-opt { border-color: var(--purple); background: #FAF5FF; }
+
   /* ---- NAV BUTTONS ---- */
   .nav-row {
     display: flex;
@@ -333,6 +362,7 @@
   }
   .a-si { background: linear-gradient(135deg, var(--green), #00A87A); color: #fff; }
   .a-no { background: linear-gradient(135deg, var(--coral), #E04E4E); color: #fff; }
+  .a-opt { background: linear-gradient(135deg, var(--purple), var(--blue)); color: #fff; }
 
   /* ---- ADMIN TOGGLE ---- */
   .admin-link {
@@ -517,6 +547,7 @@
   .resp-q { font-size: 12.5px; color: #555; font-weight: 600; flex: 1; line-height: 1.45; }
   .pill-si { background: linear-gradient(135deg, var(--green), #00A87A); color:#fff; font-size:11px; font-weight:800; padding:3px 10px; border-radius:999px; white-space:nowrap; }
   .pill-no { background: linear-gradient(135deg, var(--coral), #E04E4E); color:#fff; font-size:11px; font-weight:800; padding:3px 10px; border-radius:999px; white-space:nowrap; }
+  .pill-opt { background: linear-gradient(135deg, var(--purple), var(--blue)); color:#fff; font-size:11px; font-weight:800; padding:3px 10px; border-radius:999px; white-space:nowrap; }
 
   .no-data { text-align:center; padding: 2.5rem 1rem; color: #aaa; font-weight: 700; font-size: 15px; }
 
@@ -567,6 +598,13 @@
       <div class="step-pill">✨ Paso 1 de 2</div>
       <h2 class="page-title">¡Hola! Cuéntanos quién eres 👋</h2>
       <p class="page-desc">Completa tus datos de contacto antes de responder la encuesta.</p>
+
+      <div style="background: linear-gradient(135deg, #F0FDF8, #EEF6FF); border: 2px solid #C6F0E2; border-radius: 16px; padding: 1rem 1.25rem; margin-bottom: 1.5rem;">
+        <p style="font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; color: #00A87A; margin-bottom: 6px;">🎯 Objetivo de la encuesta</p>
+        <p style="font-size: 13.5px; font-weight: 600; color: #333; line-height: 1.65;">
+          Esta encuesta busca explorar el interés y la disposición de los estudiantes de la <strong>Licenciatura en Fisioterapia</strong> para participar en actividades vinculadas con la <strong>Evaluación del Desarrollo Infantil</strong>. Los datos recabados serán empleados exclusivamente con fines académicos y de investigación, contribuyendo al fortalecimiento de la formación profesional en el área.
+        </p>
+      </div>
 
       <div class="field">
         <label>Nombre completo <span class="req">*</span></label>
@@ -654,17 +692,18 @@
 
 <script>
 const PREGUNTAS = [
-  "¿Consideras importante contar con conocimientos sobre el desarrollo infantil?",
-  "¿Consideras que la evaluación del desarrollo infantil es una tarea compleja o difícil de realizar?",
-  "¿Conoces a alguna familia con un niño o niña menor de 6 años a quien le pudiera beneficiar una evaluación de su desarrollo infantil?",
-  "¿Te gustaría aprender a aplicar una herramienta de evaluación del desarrollo infantil en niños y niñas menores de 6 años?",
-  "En caso de realizar una evaluación del desarrollo infantil, ¿te gustaría compartir con la familia los resultados obtenidos y, cuando sea necesario, brindar recomendaciones para favorecer el desarrollo del niño o la niña?",
-  "¿Te gustaría formar parte del equipo piloto de estudiantes de la Licenciatura en Fisioterapia de la Universidad ICEST que participará en la evaluación del desarrollo infantil en menores de 6 años?"
+  { text: "¿Consideras importante contar con conocimientos sobre el desarrollo infantil?", type: "yesno" },
+  { text: "¿Consideras que la evaluación del desarrollo infantil es una tarea compleja o difícil de realizar?", type: "yesno" },
+  { text: "¿Conoces a alguna familia con un niño o niña menor de 6 años a quien le pudiera beneficiar una evaluación de su desarrollo infantil?", type: "yesno" },
+  { text: "¿Te gustaría aprender a aplicar una herramienta de evaluación del desarrollo infantil en niños y niñas menores de 6 años?", type: "yesno" },
+  { text: "En caso de realizar una evaluación del desarrollo infantil, ¿te gustaría compartir con la familia los resultados obtenidos y, cuando sea necesario, brindar recomendaciones para favorecer el desarrollo del niño o la niña?", type: "yesno" },
+  { text: "¿Te gustaría formar parte del equipo piloto de estudiantes de la Licenciatura en Fisioterapia de la Universidad ICEST que participará en la evaluación del desarrollo infantil en menores de 6 años?", type: "yesno" },
+  { text: "¿Has recibido capacitación formal sobre evaluación del desarrollo infantil durante tu formación universitaria?", type: "yesno" },
+  { text: "¿Cuántas asignaturas relacionadas con desarrollo infantil has cursado?", type: "multi", options: ["Ninguna", "Una", "Dos", "Tres o más"] }
 ];
 
 const ADMIN_PASSWORD = "icest2025";
 const STORAGE_KEY = "encuesta_icest_respuestas";
-const SHEETS_URL = "https://script.google.com/macros/s/AKfycbyaE0IvbYCMxZBtERDXSSFEwDujqaY0aS0iBDIqSycS9QyTldOLxg-56ZaJGm08qYQM/exec";
 const AVATAR_COLORS = ["#A855F7","#00C896","#FF6B6B","#38BDF8","#FF8C42","#FF5FA0","#FFD23F","#0F6E56"];
 
 let answers = new Array(PREGUNTAS.length).fill(null);
@@ -689,26 +728,56 @@ function buildQuestions() {
   const cont = document.getElementById('q-container');
   cont.innerHTML = '';
   PREGUNTAS.forEach((q, i) => {
+    const answered = answers[i] !== null;
+    const isYesNo = q.type === 'yesno';
+    const blockClass = answered
+      ? (isYesNo ? (answers[i] === 'Sí' ? ' answered-si' : ' answered-no') : ' answered-opt')
+      : '';
     const div = document.createElement('div');
-    div.className = 'q-block' + (answers[i] === 'Sí' ? ' answered-si' : answers[i] === 'No' ? ' answered-no' : '');
+    div.className = 'q-block' + blockClass;
     div.id = `qb-${i}`;
-    div.innerHTML = `
-      <p class="q-num">Pregunta ${i+1} de ${PREGUNTAS.length}</p>
-      <p class="q-text">${q}</p>
-      <div class="btn-row">
-        <button class="ans-btn${answers[i]==='Sí'?' sel-si':''}" id="bsi-${i}" onclick="select(${i},'Sí')">✔ Sí</button>
-        <button class="ans-btn${answers[i]==='No'?' sel-no':''}" id="bno-${i}" onclick="select(${i},'No')">✖ No</button>
-      </div>`;
+
+    if (isYesNo) {
+      div.innerHTML = `
+        <p class="q-num">Pregunta ${i+1} de ${PREGUNTAS.length}</p>
+        <p class="q-text">${q.text}</p>
+        <div class="btn-row">
+          <button class="ans-btn${answers[i]==='Sí'?' sel-si':''}" id="bsi-${i}" onclick="selectYN(${i},'Sí')">✔ Sí</button>
+          <button class="ans-btn${answers[i]==='No'?' sel-no':''}" id="bno-${i}" onclick="selectYN(${i},'No')">✖ No</button>
+        </div>`;
+    } else {
+      const optsHTML = q.options.map((opt, j) => `
+        <button class="opt-btn${answers[i]===opt?' sel-opt':''}" id="opt-${i}-${j}" onclick="selectOpt(${i},'${opt}')">
+          <span style="font-size:16px">${answers[i]===opt?'●':'○'}</span> ${opt}
+        </button>`).join('');
+      div.innerHTML = `
+        <p class="q-num">Pregunta ${i+1} de ${PREGUNTAS.length}</p>
+        <p class="q-text">${q.text}</p>
+        <div style="margin-top:4px">${optsHTML}</div>`;
+    }
     cont.appendChild(div);
   });
 }
 
-function select(i, val) {
+function selectYN(i, val) {
   answers[i] = val;
   document.getElementById(`bsi-${i}`).className = 'ans-btn' + (val === 'Sí' ? ' sel-si' : '');
   document.getElementById(`bno-${i}`).className = 'ans-btn' + (val === 'No' ? ' sel-no' : '');
   const block = document.getElementById(`qb-${i}`);
   block.className = 'q-block ' + (val === 'Sí' ? 'answered-si' : 'answered-no');
+}
+
+function selectOpt(i, val) {
+  answers[i] = val;
+  const q = PREGUNTAS[i];
+  q.options.forEach((opt, j) => {
+    const btn = document.getElementById(`opt-${i}-${j}`);
+    if (btn) {
+      btn.className = 'opt-btn' + (opt === val ? ' sel-opt' : '');
+      btn.innerHTML = `<span style="font-size:16px">${opt === val ? '●' : '○'}</span> ${opt}`;
+    }
+  });
+  document.getElementById(`qb-${i}`).className = 'q-block answered-opt';
 }
 
 function enviar() {
@@ -717,27 +786,22 @@ function enviar() {
     return;
   }
   document.getElementById('gerr').style.display = 'none';
-
   const nombre = document.getElementById('inp-nombre').value.trim();
   const contacto = document.getElementById('inp-contacto').value.trim();
   const entry = { nombre, contacto, answers: [...answers], fecha: new Date().toLocaleString('es-MX') };
 
-  // Guardar local como respaldo
   const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
   existing.push(entry);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
 
-  // Mostrar pantalla de éxito de inmediato
+  // Enviar a Google Sheets
+  fetch("https://script.google.com/macros/s/AKfycby0efrx_saPvAvoRYXNoMut5bzo_RP65dCp3QkzOBz0IUzjMkZaKsNDhHojQ9YgZta8/exec", {
+    method: "POST",
+    body: JSON.stringify(entry)
+  }).catch(err => console.warn("No se pudo enviar a Sheets:", err));
+
   buildSummary(nombre, contacto);
   goTo(2);
-
-  // Enviar a Google Sheets en segundo plano
-  fetch(SHEETS_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(entry)
-  }).catch(err => console.warn('No se pudo enviar a Sheets:', err));
 }
 
 function buildSummary(nombre, contacto) {
@@ -747,8 +811,8 @@ function buildSummary(nombre, contacto) {
     <div class="summary-row"><span class="summary-q">📬 Contacto</span><span style="font-size:13px;font-weight:700;">${contacto}</span></div>
     ${PREGUNTAS.map((q,i) => `
     <div class="summary-row">
-      <span class="summary-q">${i+1}. ${q.length > 65 ? q.slice(0,65)+'…' : q}</span>
-      <span class="summary-a ${answers[i]==='Sí'?'a-si':'a-no'}">${answers[i]}</span>
+      <span class="summary-q">${i+1}. ${(q.text||q).length > 65 ? (q.text||q).slice(0,65)+'…' : (q.text||q)}</span>
+      <span class="summary-a ${answers[i]==='Sí'?'a-si':answers[i]==='No'?'a-no':'a-opt'}">${answers[i]}</span>
     </div>`).join('')}`;
 }
 
@@ -788,7 +852,8 @@ function renderResponses() {
   let siCounts = new Array(PREGUNTAS.length).fill(0);
   data.forEach(r => r.answers.forEach((a,i) => { if (a === 'Sí') siCounts[i]++; }));
 
-  const totalSi = total > 0 ? Math.round(siCounts.reduce((a,b)=>a+b,0) / (total * PREGUNTAS.length) * 100) : 0;
+  const yesNoCount = PREGUNTAS.filter(q => q.type === 'yesno').length;
+  const totalSi = total > 0 ? Math.round(siCounts.reduce((a,b)=>a+b,0) / (total * yesNoCount) * 100) : 0;
 
   statsEl.innerHTML = `
     <div class="stat-card">
@@ -805,7 +870,7 @@ function renderResponses() {
     </div>
     <div class="stat-card">
       <div class="stat-num" style="color:var(--orange)">${total > 0 ? siCounts[5] : 0}</div>
-      <div class="stat-label">Quieren participar</div>
+      <div class="stat-label">Quieren ser piloto</div>
     </div>`;
 
   if (total === 0) {
@@ -831,8 +896,8 @@ function renderResponses() {
       <div class="resp-body">
         ${PREGUNTAS.map((q,i) => `
         <div class="resp-row">
-          <span class="resp-q">${i+1}. ${q}</span>
-          <span class="${r.answers[i]==='Sí'?'pill-si':'pill-no'}">${r.answers[i]}</span>
+          <span class="resp-q">${i+1}. ${q.text||q}</span>
+          <span class="${r.answers[i]==='Sí'?'pill-si':r.answers[i]==='No'?'pill-no':'pill-opt'}">${r.answers[i]}</span>
         </div>`).join('')}
       </div>
     </div>`;

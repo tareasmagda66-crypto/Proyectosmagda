@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -795,10 +794,16 @@ function enviar() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
 
   // Enviar a Google Sheets
-  fetch("https://script.google.com/macros/s/AKfycby0efrx_saPvAvoRYXNoMut5bzo_RP65dCp3QkzOBz0IUzjMkZaKsNDhHojQ9YgZta8/exec", {
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby0efrx_saPvAvoRYXNoMut5bzo_RP65dCp3QkzOBz0IUzjMkZaKsNDhHojQ9YgZta8/exec";
+  fetch(APPS_SCRIPT_URL, {
     method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "text/plain" },
     body: JSON.stringify(entry)
-  }).catch(err => console.warn("No se pudo enviar a Sheets:", err));
+  }).catch(() => {
+    const url = APPS_SCRIPT_URL + "?payload=" + encodeURIComponent(JSON.stringify(entry));
+    fetch(url).catch(err => console.warn("Error al enviar:", err));
+  });
 
   buildSummary(nombre, contacto);
   goTo(2);

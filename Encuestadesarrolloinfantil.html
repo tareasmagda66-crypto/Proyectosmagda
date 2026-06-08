@@ -794,7 +794,7 @@ function enviar() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
 
   // Enviar a Google Sheets via GET (compatible con Apps Script sin CORS)
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyhiIP80Ly7y8fNkx6GKfKmpfGegQwH2Xrl9W6I1VggthfLmt7ZfYChOyVlcguw0dC1/exec";
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyPnUVyyXZ2AgJJ2DhnCxis4jjjxPRkP-g9kJ5uR-u1Bwk0hNQfEgLRQwTw25_D46YS/exec";
   const payload = encodeURIComponent(JSON.stringify(entry));
   const img = new Image();
   img.src = APPS_SCRIPT_URL + "?payload=" + payload;

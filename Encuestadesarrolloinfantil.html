@@ -793,17 +793,11 @@ function enviar() {
   existing.push(entry);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
 
-  // Enviar a Google Sheets
+  // Enviar a Google Sheets via GET (compatible con Apps Script sin CORS)
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyhiIP80Ly7y8fNkx6GKfKmpfGegQwH2Xrl9W6I1VggthfLmt7ZfYChOyVlcguw0dC1/exec";
-  fetch(APPS_SCRIPT_URL, {
-    method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "text/plain" },
-    body: JSON.stringify(entry)
-  }).catch(() => {
-    const url = APPS_SCRIPT_URL + "?payload=" + encodeURIComponent(JSON.stringify(entry));
-    fetch(url).catch(err => console.warn("Error al enviar:", err));
-  });
+  const payload = encodeURIComponent(JSON.stringify(entry));
+  const img = new Image();
+  img.src = APPS_SCRIPT_URL + "?payload=" + payload;
 
   buildSummary(nombre, contacto);
   goTo(2);
